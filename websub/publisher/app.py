@@ -5,7 +5,6 @@ from xml.etree import ElementTree as ET
 
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
-from xml.etree.ElementTree import QName
 
 app = FastAPI(title="PodcastRelay Publisher")
 EPISODES: list[dict[str, str]] = []
@@ -40,8 +39,10 @@ def feed(request: Request):
         ("description", "A sample podcast feed for WebSub experiments"),
     ):
         ET.SubElement(channel, tag).text = value
-    ET.SubElement(channel, "link", rel="hub", href="http://127.0.0.1:8001/hub")
-    ET.SubElement(channel, "link", rel="self", href=str(request.url))
+    atom_ns = "http://www.w3.org/2005/Atom"
+    ET.register_namespace("atom", atom_ns)
+    ET.SubElement(channel, f"{{{atom_ns}}}link", rel="hub", href="http://127.0.0.1:8001/hub")
+    ET.SubElement(channel, f"{{{atom_ns}}}link", rel="self", href=str(request.url))
     for episode in reversed(EPISODES):
         item = ET.SubElement(channel, "item")
         for tag, value in (
