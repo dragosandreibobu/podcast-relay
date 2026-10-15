@@ -27,7 +27,10 @@ async def hub(
     hub_mode: str = Form(alias="hub.mode"),
     hub_topic: str = Form(alias="hub.topic"),
     hub_callback: str | None = Form(default=None, alias="hub.callback"),
+    hub_url: str | None = Form(default=None, alias="hub.url"),
 ):
+    if hub_mode == "publish" and hub_url:
+        hub_topic = hub_url
     if not local_url(hub_topic):
         raise HTTPException(400, "Demo supports only loopback topic URLs")
     if hub_mode == "publish":
